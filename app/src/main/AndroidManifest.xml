@@ -6,9 +6,11 @@
     <application
         android:allowBackup="true"
         android:label="PDF Maker"
+        android:icon="@drawable/pdf_logo"
+        android:roundIcon="@drawable/pdf_logo"
         android:theme="@style/Theme.PDFMaker">
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivityV2"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
