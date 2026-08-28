@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -37,3 +37,15 @@ jobs:
           name: PDF-Maker-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish GitHub Release v1.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk PDF-Maker-v1.1.0.apk
+          if gh release view v1.1.0 >/dev/null 2>&1; then
+            gh release upload v1.1.0 PDF-Maker-v1.1.0.apk --clobber
+          else
+            gh release create v1.1.0 PDF-Maker-v1.1.0.apk --target "$GITHUB_SHA" --title "PDF Maker v1.1.0" --notes "UI and functionality update: fixed bottom navigation layout glitch, reduced oversized headers, added Tools screen, device-wide PDF scanning, Favorites and Recent filters, working search/sort/share/delete for app files, improved Settings, JPG/PNG export, Smart Scan/ID Scan, and optional AI Scan using the user's OpenAI API key. Office/PDF conversions that need a dedicated conversion engine are clearly marked instead of producing fake output."
+          fi
