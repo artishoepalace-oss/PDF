@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -31,9 +31,21 @@ jobs:
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: PDF-Maker-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish GitHub Release v1.0.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk PDF-Maker-v1.0.0.apk
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            gh release upload v1.0.0 PDF-Maker-v1.0.0.apk --clobber
+          else
+            gh release create v1.0.0 PDF-Maker-v1.0.0.apk --target "$GITHUB_SHA" --title "PDF Maker v1.0.0" --notes "First Android release of PDF Maker. Includes Image to PDF, Smart Scan/camera capture, Import PDF, Compress PDF, PDF to JPG, Merge PDF, basic DOCX to PDF, file manager, sharing, sorting, delete actions and dark mode."
+          fi
